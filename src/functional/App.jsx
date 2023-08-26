@@ -1,77 +1,63 @@
-import { useState } from "react";
-import Input from "./Input";
-import List from "./List";
+import React, { useReducer } from 'react';
+import Input from './Input';
+import List from './List';
+
+const initialState = {
+  todos: [
+    'breakfast',
+    'lunch',
+    'snacks',
+    'Dinner'
+  ],
+  editData: {
+    index: '',
+    data: ''
+  }
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return {
+        ...state,
+        todos: [...state.todos, action.payload]
+      };
+    case 'DELETE_TODO':
+      return {
+        ...state,
+        todos: state.todos.filter((todo) => todo !== action.payload)
+      };
+    case 'EDIT_TODO':
+      return {
+        ...state,
+        editData: {
+          index: action.payload.index,
+          data: action.payload.data
+        }
+      };
+    case 'UPDATE_TODO':
+      const updatedTodos = state.todos.map((todo, index) =>
+        index === state.editData.index ? action.payload : todo
+      );
+      return {
+        todos: updatedTodos,
+        editData: {
+          index: '',
+          data: ''
+        }
+      };
+    default:
+      return state;
+  }
+}
 
 function App() {
-    let [todos, setTodos] = useState([
-      'breakfast',
-      'lunch',
-      'snacks',
-      'Dinner'
-    ]);
-
-    let [editData, setEditData] = useState({
-      index: '',
-      data: ''
-    })
-  
-    const addTodo = (data) => {
-    // console.log(data);
-
-    // let prevState = todos;
-
-    // prevState.push(data)
-
-    // console.log(prevState);
-
-    setTodos([...todos, data])
-  }
-
-  const deleteTodo = (data) => {
-
-    let filterData = todos.filter((value, index, arr) => value !== data)
-
-    setTodos([...filterData])
-  }
-
-  const editTodo = (index,data) => {
-    console.log(index,data);
-
-    setEditData({
-      index,
-      data
-    })
-   
-    // console.log(editData);
-  }
-
-  const updateTodo = (index, data) => {
-    // console.log(index,data);
-
-    // todos.splice(index,1,data)
-
-    // setTodos([...todos])
-
-    let newTodosArray = todos.map((value,ind,arr) => {
-      if(ind === index) {
-        return data;
-      }
-
-      return value;
-    })
-
-    setTodos([...newTodosArray])
-
-    setEditData({
-      index: '',
-      data: ''
-    })
-  }
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
     <div className="container">
-      <Input addTodo={addTodo} editData={editData} updateTodo={updateTodo}/>
-      <List todos={todos} deleteTodo={deleteTodo} editTodo={editTodo} />
+      <Input state={state} dispatch={dispatch} />
+      <List state={state} dispatch={dispatch} />
     </div>
   );
 }
